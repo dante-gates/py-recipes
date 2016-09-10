@@ -50,6 +50,7 @@ Now we can ask our class to restore its default settings...
 {1: 'one', 2: 'two'}
 """
 
+from copy import deepcopy
 import doctest
 
 
@@ -58,7 +59,7 @@ class ConfigMeta(type):
         cls = super().__new__(metacls, name, bases, namespace)
         dft = {}
         for k, v in namespace.items():
-            dft[k] = v
+            dft[k] = deepcopy(v)
         cls._dft = dft
         return cls
 
