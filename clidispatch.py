@@ -1,4 +1,6 @@
 """
+Build a simple command line interface providing access to arbitrary functions.
+
 >>> @Cli.register
 ... def a_function(x, y):
 ...     return x + y
@@ -9,6 +11,10 @@
 9
 >>> Cli.dispatch('--one-two-three', 1)
 9
+>>> Cli.usage() # doctest: +ELLIPSIS
+USAGE: ... 
+    --a-function <x> <y>
+    --one-two-thre <ex> [why=1] [zee=2]
 """
 
 
@@ -18,21 +24,16 @@ from inspect import signature, Parameter
 import sys
 
 
-class _final(partial):
-    def __call__(instance, *args, **kwargs):
-        super().__call__()
-
-
 class Cli:
     _reg = {}
-    _usage = ['USAGE:']
-    _usage_pre = '\tpython %s' % sys.argv[0]
+    _usage = ['USAGE: python %s <command> <args>' % sys.argv[0],
+              'WHERE command and args are one of']
 
     @classmethod
     def register(cls, fn):
         key = '--' + '-'.join(fn.__name__.split('_'))
         cls._reg[key] = fn
-        cls._usage.append('%s %s %s' % (cls._usage_pre, key, cls._build_argspec(fn)))
+        cls._usage.append(' '.join([key, cls._build_argspec(fn)]))
         return fn
 
     @classmethod
@@ -54,7 +55,7 @@ class Cli:
                 specs.append('[%s=%s]' % (param.name, param.default))
             else:
                 specs.append('<%s>' % param.name)
-        return ' '.join(specs)
+        return '    ' + ' '.join(specs)
 
 
 if __name__ == '__main__':
