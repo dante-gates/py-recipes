@@ -2,7 +2,7 @@
 Classes which inherit this as a metaclass should also inherit from Exception.
 
 Ex.
-n    >>> class E(Exception, metaclass=ErrorMeta):
+    >>> class E(Exception, metaclass=ErrorMeta):
     ...     pass
     ...
     >>> class E(metaclass=ErrorMeta):
@@ -47,6 +47,18 @@ Ex.
     Traceback (most recent call last):
         ...
     Err: exception message defined at runtime
+
+    >>> class DocumentError(Error):
+    ...     spelling = exc_msg('Spelling mistake')
+    >>> try:
+    ...     word = 'mistke'
+    ...     raise DocumentError.spelling
+    ... except DocumentError as err:
+    ...     err.extend((word,))
+    ...     raise err
+    Traceback (most recent call last):
+        ...
+    DocumentError: ('Spelling mistake', mistke')
 """
 
 import doctest
@@ -75,6 +87,10 @@ class Error(Exception, metaclass=ErrorMeta):
     """Base class for Exceptions to inherit from. Class attributes decorated
     with exc_msg may be raised and will have same type as class.
     """
+
+    def extend(self, args):
+        """Extend the arguments in the Exception."""
+        self.args += args
 
 
 if __name__ == '__main__':
