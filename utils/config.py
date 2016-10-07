@@ -48,6 +48,13 @@ Now we can ask our class to restore its default settings...
 [1, 2, 3]
 >>> AppConfig.adict
 {1: 'one', 2: 'two'}
+
+>>> class AppConfig(IndexedConfig):
+...     aninteger = 1
+...     astring = 'fooooo'
+...     alist = [1, 2, 3]
+...     adict = {1: 'one'}
+...     nested = [{1: 'one'}, {2: 'two'}]
 """
 
 from copy import deepcopy
@@ -69,6 +76,34 @@ class Config(metaclass=ConfigMeta):
     def restore_defaults(cls):
         for k, v in cls._dft.items():
             setattr(cls, k, v)
+
+
+class IndexedConfigMeta(type):
+    def __new__(metacls, name, bases, namespace):
+        cls = super().__new__(metacls, name, bases, namespace)
+        cls._dft = {}
+        for k, v in namespace.items():
+            cls._dft[k] = v
+        cls._rc = {}
+        return cls
+
+    def __getitem__(cls, key):
+        try:
+            return cls._rc[key]
+        except KeyError:
+            return cls._dft[key]
+
+    def __setitem__(cls, key, value, default=False):
+        if default:
+            cls._dft[key] = value
+        else:
+            cls._rc[key] = value
+
+
+class IndexedConfig(metaclass=IndexedConfigMeta):
+    @classmethod
+    def restore_defaults(cls):
+        cls._rc = {}
 
 
 if __name__ == '__main__':

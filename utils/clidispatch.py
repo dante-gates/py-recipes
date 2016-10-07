@@ -31,7 +31,7 @@ class Cli:
 
     @classmethod
     def register(cls, fn):
-        key = '--' + '-'.join(fn.__name__.split('_'))
+        key = '--' + '-'.join(fn.__name__.split('_'))  # won't play nice with __ method names
         cls._reg[key] = fn
         cls._usage.append(' '.join([key, cls._build_argspec(fn)]))
         return fn
@@ -56,6 +56,15 @@ class Cli:
             else:
                 specs.append('<%s>' % param.name)
         return '    ' + ' '.join(specs)
+
+
+def _parse_args(args):
+    pass
+
+
+def main(args=sys.argv[1:]):
+    fn, args, kwargs = _parse_args(args)
+    Dispatcher.dispatch(fn, *args, **kwargs)
 
 
 if __name__ == '__main__':
